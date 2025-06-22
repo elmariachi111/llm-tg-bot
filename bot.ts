@@ -79,6 +79,105 @@ const main = async () => {
     const chatId: number = msg.chat.id;
     logger.info(`message {chatId}`, { chatId });
 
+    // Handle file uploads first
+    if (msg.document || msg.photo || msg.video || msg.audio || msg.voice || msg.video_note) {
+      try {
+        let fileInfo: { fileId: string; fileName?: string; fileSize?: number; mimeType?: string } | null = null;
+        
+        if (msg.document) {
+          const info: { fileId: string; fileName?: string; fileSize?: number; mimeType?: string } = {
+            fileId: msg.document.file_id
+          };
+          if (msg.document.file_name) info.fileName = msg.document.file_name;
+          if (msg.document.file_size) info.fileSize = msg.document.file_size;
+          if (msg.document.mime_type) info.mimeType = msg.document.mime_type;
+          fileInfo = info;
+        } else if (msg.photo && msg.photo.length > 0) {
+          // Get the largest photo (last in the array)
+          const largestPhoto = msg.photo[msg.photo.length - 1];
+          if (largestPhoto) {
+            const info: { fileId: string; fileName?: string; fileSize?: number; mimeType?: string } = {
+              fileId: largestPhoto.file_id,
+              fileName: "photo.jpg",
+              mimeType: "image/jpeg"
+            };
+            if (largestPhoto.file_size) info.fileSize = largestPhoto.file_size;
+            fileInfo = info;
+          }
+        } else if (msg.video) {
+          const info: { fileId: string; fileName?: string; fileSize?: number; mimeType?: string } = {
+            fileId: msg.video.file_id,
+            fileName: "video.mp4"
+          };
+          if (msg.video.file_size) info.fileSize = msg.video.file_size;
+          if (msg.video.mime_type) info.mimeType = msg.video.mime_type;
+          fileInfo = info;
+        } else if (msg.audio) {
+          const info: { fileId: string; fileName?: string; fileSize?: number; mimeType?: string } = {
+            fileId: msg.audio.file_id,
+            fileName: msg.audio.title || "audio.mp3"
+          };
+          if (msg.audio.file_size) info.fileSize = msg.audio.file_size;
+          if (msg.audio.mime_type) info.mimeType = msg.audio.mime_type;
+          fileInfo = info;
+        } else if (msg.voice) {
+          const info: { fileId: string; fileName?: string; fileSize?: number; mimeType?: string } = {
+            fileId: msg.voice.file_id,
+            fileName: "voice_message.ogg",
+            mimeType: "audio/ogg"
+          };
+          if (msg.voice.file_size) info.fileSize = msg.voice.file_size;
+          fileInfo = info;
+        } else if (msg.video_note) {
+          const info: { fileId: string; fileName?: string; fileSize?: number; mimeType?: string } = {
+            fileId: msg.video_note.file_id,
+            fileName: "video_note.mp4",
+            mimeType: "video/mp4"
+          };
+          if (msg.video_note.file_size) info.fileSize = msg.video_note.file_size;
+          fileInfo = info;
+        }
+
+        if (fileInfo) {
+          // Get the actual file from Telegram
+          const file = await bot.getFile(fileInfo.fileId);
+          
+          // Escape special characters that could break Markdown
+          const escapeMarkdown = (text: string | undefined): string => {
+            if (!text) return 'Unknown';
+            return text.replace(/[_*[\]()~`>#+=|{}.!-]/g, '\\$&');
+          };
+          
+          // Create a formatted response message with escaped content
+          const responseMessage = `📁 File Upload Received!\n\n` +
+            `File Details:\n` +
+            `• File Name: ${escapeMarkdown(fileInfo.fileName)}\n` +
+            `• File Size: ${fileInfo.fileSize || 'Unknown'} bytes\n` +
+            `• MIME Type: ${escapeMarkdown(fileInfo.mimeType)}\n` +
+            `• File ID: ${escapeMarkdown(fileInfo.fileId)}\n\n` +
+            `Thank you for uploading! 🎉`;
+
+          // Send the response to the user (without Markdown parsing)
+          await bot.sendMessage(chatId, responseMessage);
+
+          logger.info(`File upload received {chatId} {fileName} {fileSize}`, {
+            chatId,
+            fileName: fileInfo.fileName,
+            fileSize: fileInfo.fileSize,
+            mimeType: fileInfo.mimeType,
+            filePath: file.file_path
+          });
+
+          // Don't process further since we've handled the file upload
+          return;
+        }
+      } catch (error) {
+        logger.error(`Error processing file upload`, { chatId, error });
+        console.error("Error processing file upload:", error);
+        return;
+      }
+    }
+
     // Skip processing if it's a command
     if (msg.text && !msg.text.startsWith("/")) {
       try {
