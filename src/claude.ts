@@ -63,19 +63,19 @@ export class ClaudeService {
     conversationHistory: Array<{ role: 'user' | 'assistant'; content: string }> = []
   ): Promise<ClaudeResponse> {
     try {
-      // Prepare messages array with system prompt and conversation history
-      const messages: Anthropic.Messages.MessageParam[] = [
-        {
-          role: 'user',
-          content: `System: ${SYSTEM_PROMPT}\n\nUser: ${userMessage}`
-        }
-      ];
+      // Prepare messages array
+      const messages: Anthropic.Messages.MessageParam[] = [];
 
       // Add conversation history if provided
       if (conversationHistory.length > 0) {
-        // Insert conversation history before the current message
-        messages.unshift(...conversationHistory);
+        messages.push(...conversationHistory);
       }
+
+      // Add the current user message with system prompt
+      messages.push({
+        role: 'user',
+        content: `System: ${SYSTEM_PROMPT}\n\nUser: ${userMessage}`
+      });
 
       const response = await anthropic.messages.create({
         model: 'claude-3-haiku-20240307', // Using Haiku for faster responses
