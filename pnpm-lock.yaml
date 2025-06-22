@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@anthropic-ai/sdk':
+        specifier: ^0.54.0
+        version: 0.54.0
       '@logtape/logtape':
         specifier: ^1.0.0
         version: 1.0.0
@@ -35,6 +38,10 @@ importers:
         version: 5.8.3
 
 packages:
+
+  '@anthropic-ai/sdk@0.54.0':
+    resolution: {integrity: sha512-xyoCtHJnt/qg5GG6IgK+UJEndz8h8ljzt/caKXmq3LfBF81nC/BW6E4x2rOWCZcvsLyVW+e8U5mtIr6UCE/kJw==}
+    hasBin: true
 
   '@cspotcode/source-map-support@0.8.1':
     resolution: {integrity: sha512-IchNf6dN4tHoMFIn/7OE8LWZ19Y6q/67Bmf6vnGREv8RSbBVb9LPJxEcnwrcwX6ixSvaiGoomAUvu4YSxXrVgw==}
@@ -807,6 +814,8 @@ packages:
     engines: {node: '>=6'}
 
 snapshots:
+
+  '@anthropic-ai/sdk@0.54.0': {}
 
   '@cspotcode/source-map-support@0.8.1':
     dependencies:

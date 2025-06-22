@@ -11,6 +11,12 @@ export const env = cleanEnv(process.env, {
     example: '1234567890:ABCdefGHIjklMNOpqrsTUVwxyz',
   }),
 
+  // Anthropic API Key (required for Claude integration)
+  ANTHROPIC_API_KEY: str({
+    desc: 'Anthropic API Key for Claude access',
+    example: 'sk-ant-api03-...',
+  }),
+
   // Optional: Bot configuration
   BOT_USERNAME: str({
     desc: 'Bot username (without @)',
@@ -47,6 +53,7 @@ export const env = cleanEnv(process.env, {
 // Export individual variables for convenience
 export const {
   TELEGRAM_BOT_TOKEN,
+  ANTHROPIC_API_KEY,
   BOT_USERNAME,
   PORT,
   DATABASE_URL,
